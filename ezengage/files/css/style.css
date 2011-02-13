@@ -1,0 +1,40 @@
+#ezenage_comment_sync {
+}
+#ezenage_comment_sync label{
+    display:inline;
+}
+#ezenage_comment_sync input {
+    display:inline;
+    width:10px;
+}
+#ezenage_comment_sync span {
+    font-size:12px;
+}
+
+table#ezengage_identity_table {
+    border-width: 1px;
+    border-spacing: ;
+    border-style: solid;
+    border-color: gray;
+    border-collapse: collapse;
+    background-color: white;
+    width:60%;
+}
+
+table#ezengage_identity_table th {
+    border-width: thin;
+    padding: 3px;
+    border-style: inset;
+    border-color: gray;
+    background-color: white;
+    text-align:left;
+}
+
+table#ezengage_identity_table td {
+    border-width: thin;
+    padding: 3px;
+    border-style: inset;
+    border-color: gray;
+    background-color: white;
+    text-align:left;
+}
