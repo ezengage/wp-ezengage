@@ -4,7 +4,7 @@ Plugin Name: EzEngage
 Plugin URI:  http://ezengage.com/plugin/wordpress/
 Description: 给你的站点添加通过社交网络和微博帐号登录的功能
 Author:  The EzEngage Team
-Version: 1.0
+Version: 1.0.1
 Author URI: http://ezengage.com/blog/
 */   
    
