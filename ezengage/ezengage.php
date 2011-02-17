@@ -355,7 +355,10 @@ if (!class_exists('EzEngage')) {
             else if(!$wpuid){
                 //new user
                 if(!$user_id){
-                    $username = $profile['preferred_username'];
+                    $username = preg_replace('/\W/', '', $profile['preferred_username']);
+                    if(strlen($username) <= 0){
+                        $username = $profile['provider_code'] . '_user';
+                    }
                     $wpuid = $this->get_user_by_login($username);
                     $suffix = 0;
                     while($wpuid){

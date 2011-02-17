@@ -40,7 +40,11 @@ ezEngage - 使用新浪微博，腾讯微博，人人网等社交网络帐号登
 
 == Changelog ==
 
-= 1.0 - 初始版本
+= Version 1.0 =
+*  初始版本
+
+= Version 1.0.1 =
+*  修正中文用户名可能无法登录的问题
 
 == Screenshots ==
 
