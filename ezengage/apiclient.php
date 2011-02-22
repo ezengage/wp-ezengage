@@ -6,7 +6,7 @@ class EzEngageApiClient {
     public $connecttimeout = 30;  
     public $ssl_verifypeer = FALSE; 
  
-    protected $api_base_url = 'http://ezengage.com/api/v1/';
+    protected $api_base_url = 'http://api.ezengage.com/api/v1/';
     protected $format = 'json';
     protected $last_response = array();
 

@@ -4,7 +4,7 @@ Donate link: http://ezengage.com/
 Tags:social, sns, weibo, 新浪微博, 腾讯微博, 网易微博, 人人网, tencent, qq, sina, renren, netease, oauth, social api, login, register
 Requires at least: 3.0.0
 Tested up to: 3.0
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 
 ezEngage - 使用新浪微博，腾讯微博，人人网等社交网络帐号登录你的wordpress 博客并可以同步文章和评论
 
@@ -45,6 +45,10 @@ ezEngage - 使用新浪微博，腾讯微博，人人网等社交网络帐号登
 
 = Version 1.0.1 =
 *  修正中文用户名可能无法登录的问题
+
+= Version 1.0.2 =
+*  登录Widget 使用 <app-domain>.ezengage.net 域名
+*  修改一些地址的引用
 
 == Screenshots ==
 

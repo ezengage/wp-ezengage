@@ -4,7 +4,7 @@ Plugin Name: EzEngage
 Plugin URI:  http://ezengage.com/plugin/wordpress/
 Description: 给你的站点添加通过社交网络和微博帐号登录的功能
 Author:  The EzEngage Team
-Version: 1.0.1
+Version: 1.0.2
 Author URI: http://ezengage.com/blog/
 */   
    
@@ -269,7 +269,7 @@ if (!class_exists('EzEngage')) {
                 $token_url .= '&redirect_to='. urlencode($current_page);
             }
             //TODO GET IT FROM OPTIONS
-            $widget_url = sprintf('http://%s.ezengage.com/login/%s/widget?token_cb=%s', 
+            $widget_url = sprintf('http://%s.ezengage.net/login/%s/widget?token_cb=%s', 
                     $this->options['ezengage_app_domain'], $this->options['ezengage_app_domain'], urlencode($token_url));
             if($force_choose){
                 $widget_url .= "&force_choose=1";
@@ -278,8 +278,8 @@ if (!class_exists('EzEngage')) {
             ?>
             <div style="margin-bottom:5px;">
 
-            <link rel="stylesheet" type="text/css" href="http://login.ezengage.com/static/css/eze.css" />
-            <script type="text/javascript" src="http://login.ezengage.com/static/js/ezelib-all.js"></script>
+            <link rel="stylesheet" type="text/css" href="http://loginmedia.ezengage.com/css/eze.css" />
+            <script type="text/javascript" src="http://loginmedia.ezengage.com/js/ezelib-all.js"></script>
             <a href="<?php echo $widget_url;?>" class="ezengage" title="使用微博或社交网络帐号登录" onclick="return false">使用微博或社交网络帐号登录</a>
             <script type="text/javascript">
                 EZE.overlay = true;
