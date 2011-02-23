@@ -399,6 +399,7 @@ if (!class_exists('EzEngage')) {
             if($wpuid) {
                 update_usermeta($wpuid, 'ezengage_last_provider', $profile['provider_code']);
                 update_usermeta($wpuid, 'ezengage_last_identity', $profile['identity']);
+                update_usermeta($wpuid, 'ezengage_avatar_url', $profile['avatar_url']);
                 wp_set_auth_cookie($wpuid, true, false);
                 wp_set_current_user($wpuid);
                 $this->post_bind();
