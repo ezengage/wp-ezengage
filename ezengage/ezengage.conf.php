@@ -10,6 +10,7 @@ $ezengage_providers = array(
     'tencentweibo' => array('name' => '腾讯微博', 'fake_email_suffix' => '@t.qq.com'),
     'neteaseweibo' => array('name' => '网易微博', 'fake_email_suffix' => '@t.163.com'),
     'renren' => array('name' => '人人网', 'fake_email_suffix' => '@renren.com'),
+    'sohuweibo' => array('name' => '搜狐微博', 'fake_email_suffix' => '@t.sohu.com'),
 );
 
 
