@@ -4,7 +4,7 @@ Plugin Name: EzEngage
 Plugin URI:  http://ezengage.com/plugin/wordpress/
 Description: 给你的站点添加通过社交网络和微博帐号登录的功能
 Author:  The EzEngage Team
-Version: 1.0.2.2
+Version: 1.0.2.3
 Author URI: http://ezengage.com/blog/
 */   
    
@@ -128,6 +128,7 @@ if (!class_exists('EzEngage')) {
             add_action(EZENGAGE_TOKEN_ACTION, array(&$this, 'process_token'));
             add_action(EZENGAGE_UNBIND_ACTION, array(&$this, 'unbind'));
             add_action(EZENGAGE_SET_SYNC_ACTION, array(&$this, 'set_sync_flag'));
+            add_action(EZENGAGE_TOGGLE_AVATOR_ACTION, array(&$this, 'toggle_avatar'));
 
             add_action('init', array(&$this, 'init'));
 
@@ -186,6 +187,10 @@ if (!class_exists('EzEngage')) {
         }
 
         function init(){
+            if(!function_exists('ezengage_db_create')){
+                require_once('database.php');
+            }
+            ezengage_db_create();
 
             switch($_GET['action']){
                 case EZENGAGE_TOKEN_ACTION:
@@ -196,6 +201,9 @@ if (!class_exists('EzEngage')) {
                     break;
                 case EZENGAGE_SET_SYNC_ACTION:
                     do_action(EZENGAGE_SET_SYNC_ACTION);
+                    break;
+                case EZENGAGE_TOGGLE_AVATOR_ACTION:
+                    do_action(EZENGAGE_TOGGLE_AVATOR_ACTION);
                     break;
             }
         }
@@ -295,6 +303,7 @@ if (!class_exists('EzEngage')) {
         }
 
         function get_avatar($avatar, $id_or_email='',$size='32') {
+            global $wpdb;
             global $comment;
             if(is_object($comment)) {
                 $id_or_email = $comment->user_id;
@@ -302,13 +311,17 @@ if (!class_exists('EzEngage')) {
             if (is_object($id_or_email)){
                 $id_or_email = $id_or_email->user_id;
             }
-            //TODO: FIXME
-            if($avatar_url = get_usermeta($id_or_email, 'ezengage_avatar_url')){
-                $avatar = "<img alt='' src='{$avatar_url}' class='avatar avatar-{$size}' height='{$size}' width='{$size}' />";
-                return $avatar;
-            } else {
-                return $avatar;
+            $user_id = $this->get_user_by_id_or_email($id_or_email);
+            if($user_id > 0){  
+                $sql = "SELECT avatar_url FROM {$this->identity_table_name} 
+                        WHERE user_id = %s AND enable_avatar = 1 AND avatar_url IS NOT NULL 
+                        ORDER BY id LIMIT 1;";
+                $avatar_url = $wpdb->get_var($wpdb->prepare($sql, array($user_id)));
+                if($avatar_url){
+                    $avatar = "<img alt='' src='{$avatar_url}' class='avatar avatar-{$size}' height='{$size}' width='{$size}' />";
+                }
             }
+            return $avatar;
         }
 
         function process_token(){
@@ -472,7 +485,9 @@ if (!class_exists('EzEngage')) {
             <tr>
                 <th>连接到的服务</th>
                 <th>帐号</th>
-                <th>是否同步文章</th>
+                <th>同步文章</th>
+                <th>头像</th>
+                <th>是否使用该头像</th>
                 <th>操作</th>
             </tr>
         <?php
@@ -492,6 +507,18 @@ if (!class_exists('EzEngage')) {
                         <input type="hidden" name="identity" value="<?php echo js_escape($identity->identity);?>"/>
                         </form>
                     </td>
+                    <td>
+                        <img src="<?php echo $identity->avatar_url ?>" height="32"/>
+                    </td>
+                    <td>
+                        <form method="post" action="?action=<?php echo EZENGAGE_TOGGLE_AVATOR_ACTION ?>">
+                        <input type="checkbox" id="toggle_avatar_<?php $identity->id;?>" class="enable_avatar" value="on"
+                            name="enable_avatar"
+                            onclick="this.form.submit();"
+                            <?php if ($identity->enable_avatar){ ?>checked="checked"<?php }?>/>
+                        <input type="hidden" name="identity" value="<?php echo js_escape($identity->identity);?>"/>
+                        </form>
+                    </td>
                     <!-- THAT SHOULD BE POST -->
                     <td><a href="?action=<?php echo EZENGAGE_UNBIND_ACTION;?>&identity=<?php echo urlencode($identity->identity);?>">解除连接</a></td>
                 </tr>
@@ -499,6 +526,10 @@ if (!class_exists('EzEngage')) {
             endforeach;
         ?>
             </table>
+            <p>
+               关于头像的说明，勾选使用该头像后将在评论等地方使用改头像，如果有多个头像被勾选，会使用第一个。<br/>
+               如果是网易微博，头像有防盗链，可能不能显示。　请参考<a href="http://open.t.163.com/wiki/index.php?title=%E9%A6%96%E9%A1%B5#.E5.8A.A0.E5.85.A5.E5.BC.80.E6.94.BE.E5.B9.B3.E5.8F.B0.E4.B8.8E.E6.84.8F.E8.A7.81.E5.8F.8D.E9.A6.88">网易申请域名白名单的方法</a>
+            </p>
             <h3>连接更多帐号</h3>
         <?php
             $this->connect_widget(true, 'iframe', true);
@@ -525,6 +556,20 @@ if (!class_exists('EzEngage')) {
             wp_safe_redirect(get_option('siteurl') . '/wp-admin/profile.php?page=' . EZENGAGE_IDENTITES_PAGE);
         }
 
+        function toggle_avatar(){
+            if(!is_user_logged_in()){
+                return;
+            }
+            global $user_ID;
+            global $wpdb;
+            $identity = $_POST['identity'];
+            $enable_avatar = $_POST['enable_avatar'] == 'on' ? 1 : 0;
+            $ret = $wpdb->update($this->identity_table_name, array('enable_avatar' => $enable_avatar), array('identity' => $identity, 'user_id' => $user_ID));
+            wp_safe_redirect(get_option('siteurl') . '/wp-admin/profile.php?page=' . EZENGAGE_IDENTITES_PAGE);
+        }
+
+
+
         function sync_post_to_provider($post_ID){
             $is_synced = get_post_meta($post_ID, 'ezengage_sync', true);
             if($is_synced) return;
@@ -547,7 +592,7 @@ if (!class_exists('EzEngage')) {
 
         function get_identities($wpuid){
             global $wpdb;
-            $sql = "SELECT identity,provider,sync,profile FROM {$this->identity_table_name} WHERE user_id = %s";
+            $sql = "SELECT identity,provider,sync,profile,enable_avatar,avatar_url FROM {$this->identity_table_name} WHERE user_id = %s";
             return $wpdb->get_results($wpdb->prepare($sql, $wpuid));
         }
 
@@ -556,6 +601,19 @@ if (!class_exists('EzEngage')) {
             $sql = "SELECT ID FROM $wpdb->users WHERE user_login = '%s'";
             return $wpdb->get_var($wpdb->prepare($sql, $user_login));
         }
+
+        function get_user_by_id_or_email($id_or_email) {
+            global $wpdb;
+            if(intval($id_or_email) > 0){
+                $sql = "SELECT ID FROM $wpdb->users WHERE ID = '%s'";
+            }
+            else{
+                $sql = "SELECT ID FROM $wpdb->users WHERE email = '%s'";
+            }
+            return $wpdb->get_var($wpdb->prepare($sql, $id_or_email));
+        }
+
+
 
         /**
         * @desc Adds the options subpanel

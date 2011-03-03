@@ -1,6 +1,7 @@
 <?php
 define('EZENGAGE_TOKEN_ACTION', 'ezengage_token');
 define('EZENGAGE_UNBIND_ACTION', 'ezengage_unbind');
+define('EZENGAGE_TOGGLE_AVATOR_ACTION', 'ezengage_toggle_avatar');
 define('EZENGAGE_SET_SYNC_ACTION', 'set_sync');
 define('EZENGAGE_TOKEN_URL', get_option('siteurl') . '/wp-login.php?action='.EZENGAGE_TOKEN_ACTION);
 define('EZENGAGE_IDENTITES_PAGE', 'ezenage_identities');
