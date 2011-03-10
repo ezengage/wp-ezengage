@@ -163,6 +163,12 @@ if (!class_exists('EzEngage')) {
                 update_option($this->options_name, $theOptions);
             }
             $this->options = $theOptions;
+            if(empty($this->options['ezengage_login_style'])){
+                $this->options['ezengage_login_style'] = 'small';
+            }
+            if(empty($this->options['ezengage_comment_style'])){
+                $this->options['ezengage_comment_style'] = 'small';
+            }
             
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             //There is no return here, because you should use the $this->options variable!!!
@@ -254,16 +260,16 @@ if (!class_exists('EzEngage')) {
                 }
             }
             else{
-                $this->connect_widget(true);
+                $this->connect_widget(true, $this->options['ezengage_comment_style']);
             } 
         }
 
         function login_form(){
-            $this->connect_widget(false);
+            $this->connect_widget(false, $this->options['ezengage_login_style']);
         }
 
         function register_form(){
-            $this->connect_widget(false);
+            $this->connect_widget(false, $this->options['ezengage_login_style']);
         }
 
         /**
@@ -277,29 +283,43 @@ if (!class_exists('EzEngage')) {
                 $token_url .= '&redirect_to='. urlencode($current_page);
             }
             //TODO GET IT FROM OPTIONS
-            $widget_url = sprintf('http://%s.ezengage.net/login/%s/widget?token_cb=%s', 
+            if($style == 'small'){
+                $widget_url = sprintf('http://%s.ezengage.net/login/%s/widget/small?token_cb=%s', 
                     $this->options['ezengage_app_domain'], $this->options['ezengage_app_domain'], urlencode($token_url));
+            }
+            else{
+                $widget_url = sprintf('http://%s.ezengage.net/login/%s/widget?token_cb=%s', 
+                    $this->options['ezengage_app_domain'], $this->options['ezengage_app_domain'], urlencode($token_url));
+            }
             if($force_choose){
                 $widget_url .= "&force_choose=1";
             }
+            ?>
+            <div class="ezengage_login_widget ezengage_login_widget_<?php echo $style; ?>" style="overflow:hidden;">
+            <?
             if ($style == 'link'){
             ?>
-            <div style="margin-bottom:5px;">
-
             <link rel="stylesheet" type="text/css" href="http://loginmedia.ezengage.com/css/eze.css" />
             <script type="text/javascript" src="http://loginmedia.ezengage.com/js/ezelib-all.js"></script>
             <a href="<?php echo $widget_url;?>" class="ezengage" title="使用微博或社交网络帐号登录" onclick="return false">使用微博或社交网络帐号登录</a>
             <script type="text/javascript">
                 EZE.overlay = true;
             </script>
-            </div>
         <?php
             }
-            else if($style == 'iframe'){
+            else if ($style == 'small'){
             ?>
+            <iframe boder="0" src="<?php echo $widget_url;?>"  scrolling="no" frameBorder="no" style="width:auto;height:130px;overflow:hidden;padding:0;margin:0;"></iframe>
+            <?php
+            } elseif ($style == 'normal'){
+            ?>
+            
                 <iframe boder="0" src="<?php echo $widget_url;?>"  scrolling="no" frameBorder="no" style="width:350px;height:190px;"></iframe>
             <?php 
             }
+            ?>
+            </div>
+            <?php
         }
 
         function get_avatar($avatar, $id_or_email='',$size='32') {
@@ -653,11 +673,24 @@ if (!class_exists('EzEngage')) {
                 $this->options['ezengage_app_id'] = $_POST['ezengage_app_id'];
                 $this->options['ezengage_app_key'] = $_POST['ezengage_app_key'];
                 $this->options['ezengage_enabled'] = ($_POST['ezengage_enabled']=='on')?true:false;
+
+                $this->options['ezengage_login_style'] = $_POST['ezengage_login_style'];
+                $this->options['ezengage_comment_style'] = $_POST['ezengage_comment_style'];
                                         
                 $this->save_admin_options();
                 
-                echo '<div class="updated"><p>Success! Your changes were sucessfully saved!</p></div>';
+                echo '<div class="updated"><p>成功! 你的修改已成功保存!</p></div>';
             }
+            $login_styles = array(
+                'link' => '链接',
+                'small' => '小图标',
+            );
+            $comment_styles = array(
+                'link' => '链接',
+                'small' => '小图标',
+                'normal' => '大图标',
+            );
+ 
             if(!$this->options['ezengage_app_domain'] || !$this->options['ezengage_app_id'] || !$this->options['ezengage_app_key']){
                 echo '<div class="error"><p>你的配置不完整，EzEngage 需要下面的配置才能正常工作。</p></div>';
             }
@@ -682,8 +715,39 @@ if (!class_exists('EzEngage')) {
                             <td><input name="ezengage_app_key" type="text" id="ezengage_app_key" size="50" value="<?php echo $this->options['ezengage_app_key'] ;?>"/>
                             </td> 
                         <tr valign="top"> 
-                            <th><label for="ezengage_enabled"><?php _e('启用ezengage:', $this->localizationDomain); ?></label></th><td><input type="checkbox" id="ezengage_enabled" name="ezengage_enabled" <?=($this->options['ezengage_enabled']==true)?'checked="checked"':''?>></td>
+                            <th><label for="ezengage_enabled"><?php _e('启用ezengage:', $this->localizationDomain); ?></label></th><td><input type="checkbox" id="ezengage_enabled" name="ezengage_enabled" <?echo ($this->options['ezengage_enabled']==true)?'checked="checked"':''?>></td>
                         </tr>
+
+                        <tr valign="top"> 
+                            <td colspan="2" style="border-top:1px solid gray;">以下为高级选项,一般保持默认即可:</td>
+                        </tr>
+                        <tr valign="top"> 
+                            <th><label for="ezengage_login_style"><?php _e('登录页登录框风格:', $this->localizationDomain); ?></label>
+                            </th>
+                            <td>
+                                <?php $ezengage_login_style = $this->options['ezengage_login_style']; ?>
+                                <select id="ezengage_login_style" name="ezengage_login_style">
+                                    <?php foreach($login_styles as $key=>$value): ?>
+                                    <option value="<?php echo $key; ?>" <?php echo ($ezengage_login_style == $key)?'selected="selected"' : '';?>><?php echo $value; ?></option>
+                                    <?php endforeach;?>
+                                </select>
+                            </td>
+                        </tr>
+ 
+                       <tr valign="top"> 
+                            <th><label for="ezengage_comment_style"><?php _e('评论页登录框风格:', $this->localizationDomain); ?></label>
+                            </th>
+                            <td>
+                                <?php $ezengage_comment_style = $this->options['ezengage_comment_style']; ?>
+                                <select id="ezengage_comment_style" name="ezengage_comment_style">
+                                    <?php foreach($comment_styles as $key=>$value): ?>
+                                    <option value="<?php echo $key; ?>" <?php echo ($ezengage_comment_style == $key)?'selected="selected"' : '';?>><?php echo $value; ?></option>
+                                    <?php endforeach;?>
+                                </select>
+                            </td>
+                        </tr>
+ 
+
                         <tr>
                             <th colspan=2><input class="button-primary" type="submit" name="ezengage_save" value="保存" /></th>
                         </tr>
