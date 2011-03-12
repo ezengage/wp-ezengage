@@ -4,7 +4,7 @@ Plugin Name: EzEngage
 Plugin URI:  http://ezengage.com/plugin/wordpress/
 Description: 给你的站点添加通过社交网络和微博帐号登录的功能
 Author:  The EzEngage Team
-Version: 1.0.2.5
+Version: 1.0.2.6
 Author URI: http://ezengage.com/blog/
 */   
    
@@ -260,21 +260,29 @@ if (!class_exists('EzEngage')) {
                 }
             }
             else{
-                $this->connect_widget(true, $this->options['ezengage_comment_style']);
+                if($this->options['ezengage_comment_style'] != 'none'){
+                    $this->connect_widget(true, $this->options['ezengage_comment_style']);
+                }
             } 
         }
 
         function login_form(){
-            $this->connect_widget(false, $this->options['ezengage_login_style']);
+            if($this->options['ezengage_login_style'] != 'none'){
+                $this->connect_widget(false, $this->options['ezengage_login_style']);
+            }
+ 
         }
 
         function register_form(){
-            $this->connect_widget(false, $this->options['ezengage_login_style']);
+            if($this->options['ezengage_login_style'] != 'none'){
+                $this->connect_widget(false, $this->options['ezengage_login_style']);
+            }
         }
 
         /**
         * @param should_redirect_back  if set to true, we will redirect back to current page after success login,
         *        otherwise, we will redirect to the profile page. Set this to false, if you are in the login /reigster page
+        * @param $style 'link','small','normal'
         */
         function connect_widget($should_redirect_back = true, $style = 'link', $force_choose = false){
             $token_url = EZENGAGE_TOKEN_URL;
@@ -552,7 +560,7 @@ if (!class_exists('EzEngage')) {
             </p>
             <h3>连接更多帐号</h3>
         <?php
-            $this->connect_widget(true, 'iframe', true);
+            $this->connect_widget(true, 'normal', true);
         ?>
         </div>
         <?php
@@ -684,11 +692,13 @@ if (!class_exists('EzEngage')) {
             $login_styles = array(
                 'link' => '链接',
                 'small' => '小图标',
+                'none' => '不显示,我要自己修改模版添加',
             );
             $comment_styles = array(
                 'link' => '链接',
                 'small' => '小图标',
                 'normal' => '大图标',
+                'none' => '不显示,我要自己修改模版添加',
             );
  
             if(!$this->options['ezengage_app_domain'] || !$this->options['ezengage_app_id'] || !$this->options['ezengage_app_key']){
@@ -696,7 +706,7 @@ if (!class_exists('EzEngage')) {
             }
 ?>                                   
                 <div class="wrap">
-                <h2>EzEngage 设置</h2>
+                <h2>EzEngage 设置 (详细文档请看<a href="http://ezengage.com/blog/wiki/wordpress-plugin" target="_blank">这里</a>)</h2>
                 <form method="post" id="ezengage_options">
                 <?php wp_nonce_field('ezengage-update-options'); ?>
                     <table width="100%" cellspacing="2" cellpadding="5" class="form-table"> 
@@ -761,6 +771,12 @@ if (!class_exists('EzEngage')) {
 
 //instantiate the class
 if (class_exists('EzEngage')) {
-    $EzEngage_var = new EzEngage();
+    $gEzEngage = new EzEngage();
+}
+//template tags to add ezengage login widget
+
+function ezengage_login_ui($style, $redirect_back = True){
+    global $gEzEngage;
+    $gEzEngage->connect_widget($redirect_back, $style);
 }
 ?>
