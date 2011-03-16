@@ -7,11 +7,12 @@ define('EZENGAGE_TOKEN_URL', get_option('siteurl') . '/wp-login.php?action='.EZE
 define('EZENGAGE_IDENTITES_PAGE', 'ezenage_identities');
 
 $ezengage_providers = array(
-    'sinaweibo' => array('name' => '新浪微博',  'fake_email_suffix' => '@t.sina.com.cn'),
-    'tencentweibo' => array('name' => '腾讯微博', 'fake_email_suffix' => '@t.qq.com'),
-    'neteaseweibo' => array('name' => '网易微博', 'fake_email_suffix' => '@t.163.com'),
-    'renren' => array('name' => '人人网', 'fake_email_suffix' => '@renren.com'),
-    'sohuweibo' => array('name' => '搜狐微博', 'fake_email_suffix' => '@t.sohu.com'),
+    'sinaweibo' => array('name' => '新浪微博',  'fake_email_suffix' => '@sinaweibo.ezengage.net'),
+    'tencentweibo' => array('name' => '腾讯微博', 'fake_email_suffix' => '@tencentweibo.ezengage.net'),
+    'neteaseweibo' => array('name' => '网易微博', 'fake_email_suffix' => '@neteaseweibo.ezengage.net'),
+    'renren' => array('name' => '人人网', 'fake_email_suffix' => '@renren.ezengage.net'),
+    'sohuweibo' => array('name' => '搜狐微博', 'fake_email_suffix' => '@sohuweibo.ezengage.net'),
+    'douban' => array('name' => 'douban', 'fake_email_suffix' => '@douban.ezengage.net'),
 );
 
 
