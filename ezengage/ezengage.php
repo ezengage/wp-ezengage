@@ -38,6 +38,10 @@ if ( ! defined( 'WP_PLUGIN_URL' ) )
 if ( ! defined( 'WP_PLUGIN_DIR' ) )
       define( 'WP_PLUGIN_DIR', WP_CONTENT_DIR . '/plugins' );
 
+if(!class_exists('EzEngageApiClient')){
+    require_once(dirname(__FILE__) .'/' . 'apiclient.php');
+}
+
 
 if (!class_exists('EzEngage')) {
 
@@ -184,10 +188,7 @@ if (!class_exists('EzEngage')) {
 
         function get_api_client(){
             if($this->api_client == null){
-                if(!class_exists('EzEngageApiClient')){
-                    require_once(dirname(__FILE__) .'/' . 'apiclient.php');
-                }
-                $this->api_client = new EzEngageApiClient($this->options['ezengage_app_key']);
+               $this->api_client = new EzEngageApiClient($this->options['ezengage_app_key']);
             }
             return $this->api_client;
         }
@@ -392,10 +393,7 @@ if (!class_exists('EzEngage')) {
             else if(!$wpuid){
                 //new user
                 if(!$user_id){
-                    $username = preg_replace('/\W/', '', $profile['preferred_username']);
-                    if(strlen($username) <= 0){
-                        $username = $profile['provider_code'] . '_user';
-                    }
+                    $username = $profile['provider_code'] . '_' . preg_replace('/\W/', '', $profile['preferred_username']);
                     $wpuid = $this->get_user_by_login($username);
                     $suffix = 0;
                     while($wpuid){
@@ -430,7 +428,8 @@ if (!class_exists('EzEngage')) {
                 $ret = $wpdb->insert($this->identity_table_name, array('user_id' => $wpuid,
                         'identity' => $profile['identity'],
                         'provider' => $profile['provider_code'],
-                        'profile' => eze_json_encode($profile)
+                        'profile' => eze_json_encode($profile),
+                        'avatar_url' => $profile['avatar_url'],
                 ));
             }
             if($wpuid) {
@@ -517,7 +516,7 @@ if (!class_exists('EzEngage')) {
         <?php
             foreach($identities as $identity):
                 $profile = eze_json_decode($identity->profile);
-                $account_name = $profile->display_name;
+                $account_name = $profile['display_name'];
         ?>
                 <tr>
                     <td><?php echo $ezengage_providers[$identity->provider]['name']; ?></td>
@@ -532,7 +531,7 @@ if (!class_exists('EzEngage')) {
                         </form>
                     </td>
                     <td>
-                        <img src="<?php echo $identity->avatar_url ?>" height="32"/>
+                        <img src="<?php echo $identity->avatar_url; ?>" height="32"/>
                     </td>
                     <td>
                         <form method="post" action="?action=<?php echo EZENGAGE_TOGGLE_AVATOR_ACTION ?>">

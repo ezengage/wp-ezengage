@@ -5,33 +5,6 @@
 
 require_once ('httpclient.class.php');
 
-if(true || !function_exists('json_decode')){
-    define("EZE_USE_SERVICE_JSON", 1);
-}
-else{
-    define("EZE_USE_SERVICE_JSON", 0);
-}
-
-
-if(EZE_USE_SERVICE_JSON){
-    require_once('service_json.php');
-    $GLOBALS['eze_json'] = new Services_JSON(SERVICES_JSON_LOOSE_TYPE);
-    function eze_json_decode($s){
-        return $GLOBALS['eze_json']->decode($s);
-    }
-    function eze_json_encode($s){
-        return $GLOBALS['eze_json']->encode($s);
-    }
-}
-else{
-    function eze_json_decode($s){
-        return json_decode($s, true);
-    }
-    function eze_json_encode($s){
-        return json_encode($s);
-    }
-}
-
 class EzEngageApiClient {
     public $timeout = 30; 
     public $connecttimeout = 30;  

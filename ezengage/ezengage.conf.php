@@ -12,6 +12,34 @@ $ezengage_providers = array(
     'neteaseweibo' => array('name' => '网易微博', 'fake_email_suffix' => '@neteaseweibo.ezengage.net'),
     'renren' => array('name' => '人人网', 'fake_email_suffix' => '@renren.ezengage.net'),
     'sohuweibo' => array('name' => '搜狐微博', 'fake_email_suffix' => '@sohuweibo.ezengage.net'),
-    'douban' => array('name' => 'douban', 'fake_email_suffix' => '@douban.ezengage.net'),
+    'douban' => array('name' => '豆瓣', 'fake_email_suffix' => '@douban.ezengage.net'),
 );
 
+if(true || !function_exists('json_decode')){
+    define("EZE_USE_SERVICE_JSON", 1);
+}
+else{
+    define("EZE_USE_SERVICE_JSON", 0);
+}
+
+
+if(EZE_USE_SERVICE_JSON){
+    if(!class_exists('Services_JSON')){
+        require_once(dirname(__FILE__) .'/' . 'service_json.php');
+    }
+    $GLOBALS['eze_json'] = new Services_JSON(SERVICES_JSON_LOOSE_TYPE);
+    function eze_json_decode($s){
+        return $GLOBALS['eze_json']->decode($s);
+    }
+    function eze_json_encode($s){
+        return $GLOBALS['eze_json']->encode($s);
+    }
+}
+else{
+    function eze_json_decode($s){
+        return json_decode($s, true);
+    }
+    function eze_json_encode($s){
+        return json_encode($s);
+    }
+}

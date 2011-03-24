@@ -5,7 +5,7 @@
 
 //Database versions
 global $ezengage_db_version;
-$ezengage_db_version = "2";
+$ezengage_db_version = "3";
 
 global $wpdb;
 define('EZENGAGE_IDENTITY_TABLE_NAME', $wpdb->prefix . 'ezengage_identity'); 
@@ -39,7 +39,7 @@ function ezengage_create_table_identity(){
         dbDelta($sql);
         update_option("ezengage_db_version", $ezengage_db_version);
     }
-    if(intval($installed_ver) < 2){
+    if(intval($installed_ver) < 3){
         update_ezegage_identity_avatar_url();   
     }
 }
@@ -49,7 +49,7 @@ function update_ezegage_identity_avatar_url(){
     $sql = "SELECT id,profile FROM " . EZENGAGE_IDENTITY_TABLE_NAME . " WHERE avatar_url is NULL;";
     $identities =  $wpdb->get_results($wpdb->prepare($sql));
     foreach($identities as $identity){
-        $profile = json_decode($identity->profile, true);     
+        $profile = eze_json_decode($identity->profile);     
         $wpdb->update(EZENGAGE_IDENTITY_TABLE_NAME, array('avatar_url' => $profile['avatar_url']), array('id' =>$identity->id));
     }
 }
