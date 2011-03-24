@@ -38,3 +38,34 @@ table#ezengage_identity_table td {
     background-color: white;
     text-align:left;
 }
+
+
+.ezengage_login_widget iframe {
+    border:0;
+    overflow:hidden;
+}
+
+.ezengage_login_widget_normal iframe
+{
+    width:350px;
+    height:190px;
+}
+
+.ezengage_login_widget_medium iframe
+{
+    width:252px;
+    height:150px;
+}
+
+.ezengage_login_widget_small iframe
+{
+    width:278px;
+    height:115px;
+}
+
+.ezengage_login_widget_tiny iframe
+{
+    width:120px;
+    height:54px;
+}
+

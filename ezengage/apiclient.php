@@ -1,5 +1,36 @@
 <?php
-//这是一个简单实现了token 处理流程的简单的PHP5 脚本
+/*
+	ezEngage (C)2011  http://ezengage.com
+*/
+
+require_once ('httpclient.class.php');
+
+if(true || !function_exists('json_decode')){
+    define("EZE_USE_SERVICE_JSON", 1);
+}
+else{
+    define("EZE_USE_SERVICE_JSON", 0);
+}
+
+
+if(EZE_USE_SERVICE_JSON){
+    require_once('service_json.php');
+    $GLOBALS['eze_json'] = new Services_JSON(SERVICES_JSON_LOOSE_TYPE);
+    function eze_json_decode($s){
+        return $GLOBALS['eze_json']->decode($s);
+    }
+    function eze_json_encode($s){
+        return $GLOBALS['eze_json']->encode($s);
+    }
+}
+else{
+    function eze_json_decode($s){
+        return json_decode($s, true);
+    }
+    function eze_json_encode($s){
+        return json_encode($s);
+    }
+}
 
 class EzEngageApiClient {
     public $timeout = 30; 
@@ -19,7 +50,7 @@ class EzEngageApiClient {
                '?app_key=' . urlencode($this->app_key) . '&token='. urlencode($token); 
         list($status_code, $content) = $this->http($url, 'GET');
         if($status_code == 200){
-            $profile = json_decode($content, true);     
+            $profile = eze_json_decode($content, true);     
             $this->last_response =  array($status_code, $content); 
             return $profile;
         }
@@ -47,6 +78,34 @@ class EzEngageApiClient {
      * @return array(int, string) status_code and response body
      */ 
     function http($url, $method, $payload = NULL) { 
+        #TODO open curl
+        if(false && function_exists('curl_init')){
+            return $this->http_curl($url, $method, $payload);
+        }        
+        else{
+            return $this->http_fsock($url, $method, $payload);
+        }
+    }
+
+    function http_fsock($url, $method, $payload){
+        $bits = parse_url($url);
+        $host = $bits['host'];
+        $port = isset($bits['port']) ? $bits['port'] : 80;
+        $path = isset($bits['path']) ? $bits['path'] : '/';
+        if (isset($bits['query'])) {
+            $path .= '?'.$bits['query'];
+        }
+        $client = new HttpClient($host, $port);
+        if($method == 'GET'){
+            $client->get($path);
+        }
+        else{
+            $client->post($path, $payload);
+        }
+        return array($client->getStatus(), $client->getContent());
+    }
+
+    function http_curl($url, $method, $payload){
         $ci = curl_init(); 
         curl_setopt($ci, CURLOPT_CONNECTTIMEOUT, $this->connecttimeout); 
         curl_setopt($ci, CURLOPT_TIMEOUT, $this->timeout); 

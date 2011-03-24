@@ -290,15 +290,17 @@ if (!class_exists('EzEngage')) {
                 $current_page = $_SERVER['REQUEST_URI'];
                 $token_url .= '&redirect_to='. urlencode($current_page);
             }
-            //TODO GET IT FROM OPTIONS
-            if($style == 'small'){
-                $widget_url = sprintf('http://%s.ezengage.net/login/%s/widget/small?token_cb=%s', 
-                    $this->options['ezengage_app_domain'], $this->options['ezengage_app_domain'], urlencode($token_url));
+
+            if($style == 'link'){
+                $widget_url = sprintf('http://%s.ezengage.net/login/%s/widget/%s?token_cb=%s', 
+                    $this->options['ezengage_app_domain'], $this->options['ezengage_app_domain'], 'normal', urlencode($token_url));
             }
             else{
-                $widget_url = sprintf('http://%s.ezengage.net/login/%s/widget?token_cb=%s', 
-                    $this->options['ezengage_app_domain'], $this->options['ezengage_app_domain'], urlencode($token_url));
+                $widget_url = sprintf('http://%s.ezengage.net/login/%s/widget/%s?token_cb=%s', 
+                    $this->options['ezengage_app_domain'], $this->options['ezengage_app_domain'], $style, urlencode($token_url));
             }
+
+            //TODO GET IT FROM OPTIONS
             if($force_choose){
                 $widget_url .= "&force_choose=1";
             }
@@ -315,17 +317,10 @@ if (!class_exists('EzEngage')) {
             </script>
         <?php
             }
-            else if ($style == 'small'){
+            else {
             ?>
-            <iframe boder="0" src="<?php echo $widget_url;?>"  scrolling="no" frameBorder="no" style="width:auto;height:130px;overflow:hidden;padding:0;margin:0;"></iframe>
-            <?php
-            } elseif ($style == 'normal'){
-            ?>
-            
-                <iframe boder="0" src="<?php echo $widget_url;?>"  scrolling="no" frameBorder="no" style="width:350px;height:190px;"></iframe>
-            <?php 
-            }
-            ?>
+            <iframe border="0" src="<?php echo $widget_url;?>"  scrolling="no" frameBorder="no" style="overflow:hidden;padding:0;margin:0;"></iframe>
+            <?php } ?>
             </div>
             <?php
         }
@@ -360,6 +355,7 @@ if (!class_exists('EzEngage')) {
                 $client = $this->get_api_client();
                 $profile = $client->getProfile($token);
                 if($profile === false){
+                    wp_die('fail to get user information');
                     //TODO:you can log the error, report to us. use $client->getLastResponse();
                     return;
                 }
@@ -386,7 +382,7 @@ if (!class_exists('EzEngage')) {
             $wpuid = $this->get_user_by_identity($profile['identity']);
             //bind to self or not login
             if($wpuid  && (!$user_id || $wpuid == $user_id)){
-                $wpdb->update($this->identity_table_name, array('profile' => json_encode($profile)), array(
+                $wpdb->update($this->identity_table_name, array('profile' => eze_json_encode($profile)), array(
                         'identity' => $profile['identity'],
                 ));
             }
@@ -434,7 +430,7 @@ if (!class_exists('EzEngage')) {
                 $ret = $wpdb->insert($this->identity_table_name, array('user_id' => $wpuid,
                         'identity' => $profile['identity'],
                         'provider' => $profile['provider_code'],
-                        'profile' => json_encode($profile)
+                        'profile' => eze_json_encode($profile)
                 ));
             }
             if($wpuid) {
@@ -520,7 +516,7 @@ if (!class_exists('EzEngage')) {
             </tr>
         <?php
             foreach($identities as $identity):
-                $profile = json_decode($identity->profile);
+                $profile = eze_json_decode($identity->profile);
                 $account_name = $profile->display_name;
         ?>
                 <tr>
@@ -651,6 +647,7 @@ if (!class_exists('EzEngage')) {
             //reflect the page filename (ie - options-general.php) of the page your plugin is under!
             add_options_page('EzEngage', 'EzEngage', 10, basename(__FILE__), array(&$this,'admin_options_page'));
             add_filter( 'plugin_action_links_' . plugin_basename(__FILE__), array(&$this, 'filter_plugin_actions'), 10, 2 );
+            add_action('admin_print_styles', array($this, 'add_admin_style'));
         }
 
         function admin_user_link() {
@@ -691,12 +688,16 @@ if (!class_exists('EzEngage')) {
             }
             $login_styles = array(
                 'link' => '链接',
+                'tiny' => '微型图标',
                 'small' => '小图标',
+                'medium' => '连接图标',
                 'none' => '不显示,我要自己修改模版添加',
             );
             $comment_styles = array(
                 'link' => '链接',
+                'tiny' => '微型图标',
                 'small' => '小图标',
+                'medium' => '连接图标',
                 'normal' => '大图标',
                 'none' => '不显示,我要自己修改模版添加',
             );
@@ -706,7 +707,7 @@ if (!class_exists('EzEngage')) {
             }
 ?>                                   
                 <div class="wrap">
-                <h2>EzEngage 设置 (详细文档请看<a href="http://ezengage.com/blog/wiki/wordpress-plugin" target="_blank">这里</a>)</h2>
+                <h2>EzEngage 设置 (详细文档请看<a href="http://ezengage.com/support/wordpress-plugin" target="_blank">这里</a>)</h2>
                 <form method="post" id="ezengage_options">
                 <?php wp_nonce_field('ezengage-update-options'); ?>
                     <table width="100%" cellspacing="2" cellpadding="5" class="form-table"> 
@@ -731,6 +732,8 @@ if (!class_exists('EzEngage')) {
                         <tr valign="top"> 
                             <td colspan="2" style="border-top:1px solid gray;">以下为高级选项,一般保持默认即可:</td>
                         </tr>
+                    </table>
+                    <table width="100%" cellspacing="2" cellpadding="5" class="form-table"> 
                         <tr valign="top"> 
                             <th><label for="ezengage_login_style"><?php _e('登录页登录框风格:', $this->localizationDomain); ?></label>
                             </th>
@@ -756,13 +759,26 @@ if (!class_exists('EzEngage')) {
                                 </select>
                             </td>
                         </tr>
- 
 
                         <tr>
-                            <th colspan=2><input class="button-primary" type="submit" name="ezengage_save" value="保存" /></th>
+                            <th colspan="2"><input class="button-primary" type="submit" name="ezengage_save" value="保存" /></th>
                         </tr>
                     </table>
                 </form>
+                <div id="login-widget-preview">
+                    <h4>样式预览</h4>
+                    <table cellpadding="10">
+                    <?php foreach($comment_styles as $key=>$value): ?>
+                       <?php if($key == "none") { continue;}?>
+                      <tr>
+                        <td><?php echo $value; ?></td>
+                        <td>
+                        <?php $this->connect_widget(true, $key, true); ?>
+                        </td>
+                      </tr>
+                    <?php endforeach;?>
+                    </table>
+                </div>
                 <?php
         }
         

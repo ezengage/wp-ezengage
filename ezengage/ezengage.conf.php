@@ -15,4 +15,3 @@ $ezengage_providers = array(
     'douban' => array('name' => 'douban', 'fake_email_suffix' => '@douban.ezengage.net'),
 );
 
-
