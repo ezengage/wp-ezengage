@@ -631,7 +631,7 @@ if (!class_exists('EzEngage')) {
                 $sql = "SELECT ID FROM $wpdb->users WHERE ID = '%s'";
             }
             else{
-                $sql = "SELECT ID FROM $wpdb->users WHERE email = '%s'";
+                $sql = "SELECT ID FROM $wpdb->users WHERE user_email = '%s'";
             }
             return $wpdb->get_var($wpdb->prepare($sql, $id_or_email));
         }
