@@ -307,7 +307,7 @@ if (!class_exists('EzEngage')) {
             }
             ?>
             <div class="ezengage_login_widget ezengage_login_widget_<?php echo $style; ?>" style="overflow:hidden;">
-            <?
+            <?php
             if ($style == 'link'){
             ?>
             <link rel="stylesheet" type="text/css" href="http://loginmedia.ezengage.com/css/eze.css" />
@@ -725,7 +725,7 @@ if (!class_exists('EzEngage')) {
                             <td><input name="ezengage_app_key" type="text" id="ezengage_app_key" size="50" value="<?php echo $this->options['ezengage_app_key'] ;?>"/>
                             </td> 
                         <tr valign="top"> 
-                            <th><label for="ezengage_enabled"><?php _e('启用ezengage:', $this->localizationDomain); ?></label></th><td><input type="checkbox" id="ezengage_enabled" name="ezengage_enabled" <?echo ($this->options['ezengage_enabled']==true)?'checked="checked"':''?>></td>
+                            <th><label for="ezengage_enabled"><?php _e('启用ezengage:', $this->localizationDomain); ?></label></th><td><input type="checkbox" id="ezengage_enabled" name="ezengage_enabled" <?php echo ($this->options['ezengage_enabled']==true)?'checked="checked"':''?>></td>
                         </tr>
 
                         <tr valign="top"> 
